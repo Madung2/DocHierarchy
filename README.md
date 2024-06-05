@@ -14,17 +14,23 @@
 세부적인 처리가 필요할시 조건을 다르게 작성해야하는 점 말씀드립니다.)
 ***
 
-## 어플리케이션 실행
+## FASTAPI 어플리케이션 실행
 ```
 # 루트 디렉토리로 이동
 $ poetry run uvicorn app.main:app --reload
 ```
-## 라이브러리 추가
+
+## STREAMLIT어플리케이션 실행
+```
+$ poetry run streamlit run streamlit/main.py
+```
+
+#### 라이브러리 추가
 ```
 poetry add python-docx
 ```
 
-## 테스트 환경 설정
+#### 테스트 환경 설정
 ```
 poetry add --dev pytest
 ```

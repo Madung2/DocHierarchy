@@ -2,6 +2,7 @@ from docx import Document
 import json
 from typing import List, Dict
 import streamlit as st
+import streamlit.components.v1 as components
 
 def get_alignment(paragraph):
     alignment_map = {
@@ -72,6 +73,45 @@ def assign_levels(content: List[Dict]) -> List[Dict]:
     return content
 
 
+# def generate_html(content):
+#     html = ""
+#     for ele in content:
+#         level = ele['level']
+#         text = ele['text']
+#         is_bold = "font-weight: bold;" if ele['is_bold'] else ""
+#         font_size = f"font-size: {ele['font_size']}px;" if ele['font_size'] > 0 else ""
+
+#         # details-summary 구조 생성
+#         if 'inner_content' in ele:
+#             html += f"<details style='{font_size}{is_bold}'><summary>{text}</summary>\n"
+#             html += generate_html(ele['inner_content'])  # 재귀 호출
+#             html += "</details>\n"
+#         else:
+#             html += f"<p style='margin-left: {level * 20}px; {font_size}{is_bold}'>{text}</p>\n"
+#     return html
+# HTML 생성 함수
+def generate_html(content):
+    def create_html(ele):
+        is_bold = "font-weight: bold;" if ele['is_bold'] else ""
+        font_size = f"font-size: {ele['font_size']}px;" if ele['font_size'] > 0 else ""
+        style = f"{font_size} {is_bold}"
+
+        html = f"<div style='margin-left: {ele['level'] * 20}px; {style}'>"
+        if 'inner_content' in ele:
+            html += f"<span class='dropdown' onclick='toggle(this)'>{ele['text']}</span>\n"
+            html += f"<div class='inner-content' style='display:none'>"
+            for inner in ele['inner_content']:
+                html += create_html(inner)
+            html += "</div>"
+        else:
+            html += f"{ele['text']}"
+        html += "</div>"
+        return html
+
+    html = ""
+    for ele in content:
+        html += create_html(ele)
+    return html
 
 def remove_textless_content(content):
     processed_content = []
@@ -115,7 +155,7 @@ st.write("* 번호매기기 모듈")
 uploaded_file = st.file_uploader("Choose a file", type=['docx', 'doc'])
 st.write("----------------------")
 
-
+html_code =""
 if uploaded_file is not None:
     print(uploaded_file, type(uploaded_file))
     if uploaded_file.type != "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
@@ -123,12 +163,33 @@ if uploaded_file is not None:
     content = parse_docx(uploaded_file)
     content = assign_levels(content)
     content = remove_textless_content(content) ## text없는 공백줄도 필요하면 이부분 주석처리 요망
-    print(content,'111')
+    print('before_ tree', content)
+    ## make html content
+    html_code = generate_html(content)
+    # for ele in content:
+    #     level = ele['level']
+    #     text = ele['text']
+    #     indent = "&nbsp;" * (level * 4)  # level에 따라 들여쓰기
+    #     html_code += f"<p>{indent}{text}</p>\n"
     content = build_tree(content)
 
 else:
     content ={"hello": "World!"}
 
 
+tabs = ["HTML", "JSON"]
 
-st.json(content, expanded=True)
+selected_tab = st.radio('Select a tab', tabs)
+if selected_tab == 'HTML':
+    st.markdown(html_code, unsafe_allow_html=True)
+elif selected_tab == 'JSON':
+    st.json(content, expanded=True)
+else:
+    st.markdown(html_code, unsafe_allow_html=True)
+
+
+
+# col1, col2 = st.columns(2)
+# with col1:
+# with col2:
+# components.html(f"{css_code}{html_code}{js_code}", height=800, scrolling=True)

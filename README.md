@@ -1,4 +1,5 @@
 # DocHierarchy
+![image](https://github.com/Madung2/DocHierarchy/assets/104334219/20832d05-657d-47b3-8de7-3b595eedb513)
 
 ## 목표: 
 * docx파일을 만들면 그 hierarchy에 맞는 json파일을 리턴한다.

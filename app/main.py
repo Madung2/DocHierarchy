@@ -14,14 +14,48 @@ def get_alignment(paragraph):
     }
     return alignment_map.get(paragraph.alignment, 'unknown')
 
-def parse_docx(file) -> List[dict]:
-    document = Document(file)
-    content = []
+# def parse_docx(file) -> List[dict]:
+#     document = Document(file)
+#     content = []
     
 
-    for i,para in enumerate(document.paragraphs):
-        font_size= 0
-        bold_text= False
+#     for i,para in enumerate(document.paragraphs):
+#         font_size= 0
+#         bold_text= False
+
+#         # 1) font 추출
+#         if para.runs:
+#             if para.runs[0].font.size:
+#                 font_size = para.runs[0].font.size.pt
+
+#         # 2) 정렬정보
+#         alignment = get_alignment(para)
+        
+#         # 3) 단락에서 볼드텍스트 추출
+#         if para.runs:
+#             if para.runs[0].bold:
+#                 bold_text= True
+
+
+#         content.append({
+#             "idx": i,
+#             "type": "paragraph",
+#             "font_size": font_size,
+#             "align_center": True if alignment =='center' else False,
+#             "is_bold": bold_text,
+#             "text": para.text
+#         })
+
+#     # 테이블은 일단 무시한다
+#     return content
+def parse_docx(file) -> List[Dict]:
+    document = Document(file)
+    content = []
+    table_count = 0
+
+    def add_paragraph(i, para):
+        font_size = 0
+        bold_text = False
 
         # 1) font 추출
         if para.runs:
@@ -30,25 +64,41 @@ def parse_docx(file) -> List[dict]:
 
         # 2) 정렬정보
         alignment = get_alignment(para)
-        
+
         # 3) 단락에서 볼드텍스트 추출
         if para.runs:
             if para.runs[0].bold:
-                bold_text= True
-
+                bold_text = True
 
         content.append({
             "idx": i,
             "type": "paragraph",
             "font_size": font_size,
-            "align_center": True if alignment =='center' else False,
+            "align_center": True if alignment == 'center' else False,
             "is_bold": bold_text,
             "text": para.text
         })
 
-    # 테이블은 일단 무시한다
-    return content
+    i = 0
+    for block in document.element.body:
+        print(111, block.tag)
+        if block.tag.endswith('p'):
+            add_paragraph(i, Document(block).paragraphs[0])
+            i += 1
+        elif block.tag.endswith('tbl'):
+            print('tabl:e', block)
+            content.append({
+                "idx": i,
+                "type": "table",
+                "font_size": "0",
+                "align_center": True,
+                "is_bold": False,
+                "text": f"<<테이블 id:{table_count} 존재>>"
+            })
+            table_count += 1
+            i += 1
 
+    return content
 def assign_levels(content: List[Dict]) -> List[Dict]:
     # 우선 font-size 기준으로 레벨을 결정합니다.
 
@@ -114,6 +164,7 @@ async def create_upload_file(file: UploadFile = File(...)):
         return JSONResponse(content={"error": "Invalid file type"}, status_code=400)
     
     content = parse_docx(file.file)
+    print('content', content)
     leveled_content = assign_levels(content)
     process_content = remove_textless_content(leveled_content) ## text없는 공백줄도 필요하면 이부분 주석처리 요망
     tree_structure = build_tree(process_content)

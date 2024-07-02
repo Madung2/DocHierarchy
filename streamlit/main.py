@@ -4,6 +4,7 @@ from typing import List, Dict
 import streamlit as st
 import streamlit.components.v1 as components
 from table_extract import *
+from numbering import DocNumberingExtractor
 
 def get_alignment(paragraph):
     alignment_map = {
@@ -14,47 +15,16 @@ def get_alignment(paragraph):
     }
     return alignment_map.get(paragraph.alignment, 'unknown')
 
-# def parse_docx(file) -> List[dict]:
-#     document = Document(file)
-#     content = []
-    
-
-#     for i,para in enumerate(document.paragraphs):
-#         font_size= 0
-#         bold_text= False
-
-#         # 1) font 추출
-#         if para.runs:
-#             if para.runs[0].font.size:
-#                 font_size = para.runs[0].font.size.pt
-
-#         # 2) 정렬정보
-#         alignment = get_alignment(para)
-        
-#         # 3) 단락에서 볼드텍스트 추출
-#         if para.runs:
-#             if para.runs[0].bold:
-#                 bold_text= True
-
-
-#         content.append({
-#             "idx": i,
-#             "type": "paragraph",
-#             "font_size": font_size,
-#             "align_center": True if alignment =='center' else False,
-#             "is_bold": bold_text,
-#             "text": para.text
-#         })
-
-#     # 테이블은 일단 무시한다
-#     return content
 def parse_docx(file, table_dict) -> List[Dict]:
+    
     document = Document(file)
+    num = DocNumberingExtractor(file)
+    num_data= num.numbering_data
     content = []
     table_count = 0
     i = 0
 
-    def add_paragraph(para, index):
+    def add_paragraph(para, index, para_idx):
         font_size = 0
         bold_text = False
 
@@ -67,14 +37,16 @@ def parse_docx(file, table_dict) -> List[Dict]:
         if para.runs:
             if para.runs[0].bold:
                 bold_text = True
-
+        numbering = num_data[para_idx]['numbering'] if para_idx in num_data else ''
         content.append({
             "idx": index,
+            "para_idx": para_idx, # this is for numbering
+            "numbering": numbering,
             "type": "paragraph",
             "font_size": font_size,
             "align_center": True if alignment == 'center' else False,
             "is_bold": bold_text,
-            "text": para.text
+            "text": f"{numbering} {para.text}"
         })
     para_idx = 0 
     for block in document.element.body:
@@ -82,7 +54,7 @@ def parse_docx(file, table_dict) -> List[Dict]:
         if block.tag.endswith('p'):
             para = document.paragraphs[para_idx]
             para._element = block
-            add_paragraph(para, i)
+            add_paragraph(para, i, para_idx)
             i += 1
             para_idx +=1
         elif block.tag.endswith('tbl'):
@@ -123,24 +95,6 @@ def assign_levels(content: List[Dict]) -> List[Dict]:
         item["level"] = calculate_level(item.get("font_size"), item.get("align_center"), item.get("is_bold"))
     return content
 
-
-# def generate_html(content):
-#     html = ""
-#     for ele in content:
-#         level = ele['level']
-#         text = ele['text']
-#         is_bold = "font-weight: bold;" if ele['is_bold'] else ""
-#         font_size = f"font-size: {ele['font_size']}px;" if ele['font_size'] > 0 else ""
-
-#         # details-summary 구조 생성
-#         if 'inner_content' in ele:
-#             html += f"<details style='{font_size}{is_bold}'><summary>{text}</summary>\n"
-#             html += generate_html(ele['inner_content'])  # 재귀 호출
-#             html += "</details>\n"
-#         else:
-#             html += f"<p style='margin-left: {level * 20}px; {font_size}{is_bold}'>{text}</p>\n"
-#     return html
-# HTML 생성 함수
 def generate_html(content):
     def create_html(ele):
         is_bold = "font-weight: bold;" if ele['is_bold'] else ""
@@ -213,18 +167,12 @@ if uploaded_file is not None:
 
     ## do table ##
     table_dict = extract_tables_from_html(uploaded_file)
-
     content = parse_docx(uploaded_file, table_dict)
     content = assign_levels(content)
     content = remove_textless_content(content) ## text없는 공백줄도 필요하면 이부분 주석처리 요망
-    print('before_ tree', content)
+
     ## make html content
     html_code = generate_html(content)
-    # for ele in content:
-    #     level = ele['level']
-    #     text = ele['text']
-    #     indent = "&nbsp;" * (level * 4)  # level에 따라 들여쓰기
-    #     html_code += f"<p>{indent}{text}</p>\n"
     content = build_tree(content)
 
 else:

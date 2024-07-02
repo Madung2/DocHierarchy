@@ -797,6 +797,21 @@ files = [
 ]
 
 [[package]]
+name = "numbering"
+version = "0.1.3"
+description = ""
+optional = false
+python-versions = ">=3.12"
+files = [
+    {file = "numbering-0.1.3-py3-none-any.whl", hash = "sha256:89d74b36e3a8f5c787c7aee340ad5d59538ba97c565b3264dfb0f7c242000677"},
+    {file = "numbering-0.1.3.tar.gz", hash = "sha256:69846234f31065e057cb6e48ca2a09121e4a82111bc9fac042789e8204ac2952"},
+]
+
+[package.dependencies]
+python-docx = ">=1.1.2"
+python-dotenv = ">=1.0.1"
+
+[[package]]
 name = "numpy"
 version = "1.26.4"
 description = "Fundamental package for array computing in Python"
@@ -2143,4 +2158,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "ba24f30f495305cb9e8c51ab180c109e7b272504ecfb7e245664218136b187a3"
+content-hash = "2a1b85b5afd8502eba4e77cd5a2e280f6b4da6166b2c31dccdeee900abb2fc85"

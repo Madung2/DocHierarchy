@@ -19,8 +19,11 @@ if uploaded_file is not None:
     content = parser.parse()
     content = parser.assign_levels(content)
     content = parser.remove_textless_content(content)
-    html_code = parser.generate_html(content)
+    ### tab 위치 지정
     content = parser.get_x_pos_level(content)
+    parser.put_table_level(content)
+    ### tab 위치 지정
+    html_code = parser.generate_html(content)
     print(content)
 
     content = parser.build_tree(content)

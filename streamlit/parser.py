@@ -114,10 +114,14 @@ class DocxParser:
                 # level += is_bolds.index(is_bold)
             return level
         ## 1단계
-        for item in content:
+        for i, item in enumerate(content):
             item["level"] = _calculate_level(item.get("font_size"), item.get("align_center"), item.get("is_bold"), item.get("x_pos"))
-        
-        
+
+            # else: # table인 경우엔 이전 요소의 레벨을 가져온다
+            #     item["level"] = 0 if i == 0 else content[i-1]["level"]
+
+            item["total"] = item["level"]
+
         return content
     
     @staticmethod
@@ -154,13 +158,26 @@ class DocxParser:
             unique_sorted_x_pos = sorted(set(x_pos_list))
 
             for para in group:
-                para["x_pos_level"] = unique_sorted_x_pos.index(para["x_pos"]) + 1
+                para["x_pos_level"] = unique_sorted_x_pos.index(para["x_pos"])
+                para["total"] = para["total"] + para["x_pos_level"]
 
         return content
+    
+    @staticmethod
+    def put_table_level(content):
+        """테이블 레벨은 직전 parargraph+1이어야 함
+        """
+        for i, item in enumerate(content):
+            if item["type"] == "table":
+                if i> 0 :
+                    item["level"] = content[i-1]["total"]
+                else:
+                    item["level"] = 0 
+                item["total"] = item["level"]
 
     @staticmethod
     def remove_textless_content(content: List[Dict]) -> List[Dict]:
-        return [ele for ele in content if ele['text'] != '']
+        return [item for item in content if item['text'] != '']
 
     @staticmethod
     def build_tree(content: List[Dict]) -> List[Dict]:
@@ -186,7 +203,7 @@ class DocxParser:
             is_bold = "font-weight: bold;" if ele['is_bold'] else ""
             font_size = f"font-size: {ele['font_size']}px;" if ele['font_size'] > 0 else ""
             style = f"{font_size} {is_bold}"
-            html = f"<div style='margin-left: {ele['level'] * 20}px; {style}'>"
+            html = f"<div style='margin-left: {ele['total'] * 20}px; {style}'>"
             if 'inner_content' in ele:
                 html += f"<span class='dropdown' onclick='toggle(this)'>{ele['text']}</span>\n"
                 html += f"<div class='inner-content' style='display:none'>"

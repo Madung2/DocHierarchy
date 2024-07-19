@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # 필요한 패키지 설치 (LibreOffice 및 JRE 포함)
 RUN apt-get update && \
-    apt-get install -y wget gnupg software-properties-common openjdk-11-jre libreoffice && \
+    apt-get install -y wget gnupg software-properties-common default-jre libreoffice && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 

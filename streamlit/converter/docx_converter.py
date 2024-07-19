@@ -25,7 +25,7 @@ def convert_to_docx(input_file, output_dir):
         subprocess.run(command, check=True)
     else:  # Linux and others
         print('linux running~~~~~')
-        url = "http://libreoffice:8000/convert"
+        url = "http://libreoffice:8800/convert"
         data = {'input_file': input_file, 'output_dir': output_dir}
         response = requests.post(url, json=data)
         if response.status_code != 200:

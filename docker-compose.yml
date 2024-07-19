@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile.libreoffice
     ports:
       - "2002:2002"
-      - "8000:8000"
+      - "8800:8800"
     volumes:
       - shared_data:/shared_data # 볼륨 공유를 해야 저장된 파일을 가지고 올 수 있음
     networks:

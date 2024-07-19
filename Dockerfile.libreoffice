@@ -27,7 +27,7 @@ COPY convert_server.py /convert_server.py
 
 # 포트 노출
 EXPOSE 2002
-EXPOSE 8000
+EXPOSE 8800
 
 # HTTP 서버 및 LibreOffice 시작
-CMD ["uvicorn", "convert_server:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "convert_server:app", "--host", "0.0.0.0", "--port", "8800"]

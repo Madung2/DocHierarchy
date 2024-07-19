@@ -5,6 +5,7 @@ import streamlit as st
 from parser import DocxParser
 from converter.docx_converter import convert_to_docx
 
+
 st.title("docx 문서 구조화 모듈")
 st.write("----------------------")
 
@@ -21,22 +22,23 @@ if uploaded_file is not None:
     if not os.path.exists(temp_dir):
         os.makedirs(temp_dir)
 
-    # Save uploaded file to a temporary location
-    temp_input_file = os.path.join(temp_dir, uploaded_file.name)
-    with open(temp_input_file, "wb") as f:
+    # Save uploaded file to a temporary location in shared_data
+    shared_data_input_file = os.path.join(temp_dir, uploaded_file.name)
+    with open(shared_data_input_file, "wb") as f:
         f.write(uploaded_file.getbuffer())
     output_dir = temp_dir
 
     # Check file type and convert if necessary
     print('type', uploaded_file.type)
     if uploaded_file.type in ["application/x-hwp", "application/haansofthwp"]:
-        temp_input_file = convert_to_docx(temp_input_file, output_dir)
+        # Convert the file if it's a HWP file
+        shared_data_input_file = convert_to_docx(shared_data_input_file, output_dir)
 
     # Check if the file is a valid DOCX file
-    if not temp_input_file.endswith(".docx"):
+    if not shared_data_input_file.endswith(".docx"):
         content = {"error": "Invalid file type"}
     else:
-        parser = DocxParser(temp_input_file)
+        parser = DocxParser(shared_data_input_file)
         content = parser.parse()
         content = parser.assign_levels(content)
         content = parser.remove_textless_content(content)

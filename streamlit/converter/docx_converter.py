@@ -2,11 +2,7 @@ import subprocess
 import os
 import requests
 
-def convert_to_docx(i_file, output_dir):
-    
-    input_file = os.path.join('/shared_data', os.path.basename(i_file))
-    output_dir = '/shared_data'
-
+def convert_to_docx(input_file, output_dir):
     print(1, 'input', input_file)
     if not os.path.isfile(input_file):
         raise FileNotFoundError(f"The file {input_file} does not exist.")
@@ -28,7 +24,7 @@ def convert_to_docx(i_file, output_dir):
         print('linux running~~~~~')
         url = "http://libreoffice:8800/convert"
         data = {'input_file': input_file, 'output_dir': output_dir}
-        response = requests.postㄹconvert_to_docx(url, json=data)
+        response = requests.post(url, json=data)
         if response.status_code != 200:
             raise RuntimeError(f"Failed to convert {input_file} to DOCX format. Error: {response.json()}")
         output_file = response.json().get('output_file')

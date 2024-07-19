@@ -7,6 +7,9 @@ services:
       dockerfile: Dockerfile.libreoffice
     ports:
       - "2002:2002"
+      - "8000:8000"
+    volumes:
+      - shared_data:/shared_data # 볼륨 공유를 해야 저장된 파일을 가지고 올 수 있음
     networks:
       - app-network
 
@@ -18,9 +21,14 @@ services:
       - "8503:8503"
     depends_on:
       - libreoffice
+    volumes:
+      - shared_data:/shared_data
     networks:
       - app-network
 
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  shared_data:

@@ -17,7 +17,7 @@ if uploaded_file is not None:
     print(uploaded_file, type(uploaded_file))
 
     # Create temp directory if it doesn't exist
-    temp_dir = os.path.join("streamlit", "converter", "converted_files")
+    temp_dir = os.path.join("/shared_data", "streamlit", "converter", "converted_files")
     if not os.path.exists(temp_dir):
         os.makedirs(temp_dir)
 

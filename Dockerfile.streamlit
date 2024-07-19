@@ -29,4 +29,4 @@ COPY . /app
 EXPOSE 8503
 
 # Streamlit 애플리케이션 실행
-CMD ["poetry", "run", "streamlit", "run", "streamlit/main.py", "--server.port", "8503"]
+CMD ["poetry", "run", "streamlit", "run", "streamlit/main.py", "--server.port", "8800"]

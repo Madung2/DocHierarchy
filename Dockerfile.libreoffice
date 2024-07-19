@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # 필요한 패키지 설치 (LibreOffice 및 JRE 포함)
 RUN apt-get update && \
-    apt-get install -y wget gnupg software-properties-common default-jre libreoffice && \
+    apt-get install -y wget gnupg software-properties-common default-jre libreoffice python3-pip && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -19,8 +19,15 @@ RUN libreoffice --headless --norestore --nofirststartwizard --accept="socket,hos
     unopkg add --shared /tmp/H2Orestart-0.6.6.oxt && \
     pkill -f soffice
 
+# HTTP 서버를 위한 Python 패키지 설치
+RUN pip install fastapi uvicorn
+
+# HTTP 서버 스크립트 복사
+COPY convert_server.py /convert_server.py
+
 # 포트 노출
 EXPOSE 2002
+EXPOSE 8000
 
-# LibreOffice 헤드리스 서비스 시작
-CMD libreoffice --headless --norestore --nofirststartwizard --accept="socket,host=0.0.0.0,port=2002;urp;" --nodefault --nologo
+# HTTP 서버 및 LibreOffice 시작
+CMD ["uvicorn", "convert_server:app", "--host", "0.0.0.0", "--port", "8504"]

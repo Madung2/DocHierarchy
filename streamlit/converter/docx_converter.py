@@ -22,16 +22,13 @@ def convert_to_docx(input_file, output_dir):
         command = [libreoffice_path, '--headless', '--convert-to', 'docx', input_file, '--outdir', output_dir]
     else:  # Linux and others
         print('linux running~~~~~')
-        libreoffice_path = "/usr/bin/libreoffice"
-        command = [
-            libreoffice_path,
-            '--headless',
-            '--convert-to', 'docx',
-            input_file,
-            '--outdir', output_dir,
-           '--accept=socket,host=libreoffice,port=2002;urp;'
-        ]
-    
+        url = "http://libreoffice:8800/convert"
+        data = {'input_file': input_file, 'output_dir': output_dir}
+        response = requests.post(url, json=data)
+        if response.status_code != 200:
+            raise RuntimeError(f"Failed to convert {input_file} to DOCX format. Error: {response.json()}")
+        output_file = response.json().get('output_file')
+
     print(3, 'LibreOffice path:', libreoffice_path)
 
     # Command to convert the file to DOCX format using LibreOffice

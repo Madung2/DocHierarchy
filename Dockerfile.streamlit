@@ -1,0 +1,32 @@
+# Python Slim 베이스 이미지 사용
+FROM python:3.12-slim
+
+# 비대화형 모드 설정
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Poetry 설치
+RUN apt-get update && \
+    apt-get install -y wget curl && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+RUN curl -sSL https://install.python-poetry.org | python3 - && \
+    ln -s /root/.local/bin/poetry /usr/local/bin/poetry
+
+# 작업 디렉토리 설정
+WORKDIR /app
+
+# Poetry 설정 복사
+COPY poetry.lock pyproject.toml /app/
+
+# Poetry 종속성 설치
+RUN poetry install --no-root
+
+# 애플리케이션 코드 복사
+COPY . /app
+
+# 포트 노출
+EXPOSE 8503
+
+# Streamlit 애플리케이션 실행
+CMD ["poetry", "run", "streamlit", "run", "streamlit/main.py", "--server.port", "8503"]

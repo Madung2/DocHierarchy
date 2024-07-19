@@ -19,14 +19,22 @@ def convert_to_docx(input_file, output_dir):
     # Determine the OS and set the LibreOffice path accordingly
     if os.name == 'nt':  # Windows
         libreoffice_path = r"C:\Program Files\LibreOffice\program\soffice.exe"
+        command = [libreoffice_path, '--headless', '--convert-to', 'docx', input_file, '--outdir', output_dir]
     else:  # Linux and others
         print('linux running~~~~~')
         libreoffice_path = "/usr/bin/libreoffice"
+        command = [
+            libreoffice_path,
+            '--headless',
+            '--convert-to', 'docx',
+            input_file,
+            '--outdir', output_dir,
+           '--accept=socket,host=libreoffice,port=2002;urp;'
+        ]
     
     print(3, 'LibreOffice path:', libreoffice_path)
 
     # Command to convert the file to DOCX format using LibreOffice
-    command = [libreoffice_path, '--headless', '--convert-to', 'docx', input_file, '--outdir', output_dir]
 
     # Run the command
     print(4, 'Running command:', ' '.join(command))

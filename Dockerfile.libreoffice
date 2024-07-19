@@ -1,0 +1,26 @@
+# Python Slim 베이스 이미지 사용
+FROM python:3.12-slim
+
+# 비대화형 모드 설정
+ENV DEBIAN_FRONTEND=noninteractive
+
+# 필요한 패키지 설치 (LibreOffice 및 JRE 포함)
+RUN apt-get update && \
+    apt-get install -y wget gnupg software-properties-common openjdk-11-jre libreoffice && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# H2Orestart 확장 다운로드 및 설치
+RUN wget -O /tmp/H2Orestart-0.6.6.oxt https://extensions.libreoffice.org/assets/downloads/2303/1720302570/H2Orestart-0.6.6.oxt
+
+# LibreOffice 확장 설치
+RUN libreoffice --headless --norestore --nofirststartwizard --accept="socket,host=0.0.0.0,port=2002;urp;" --nodefault --nologo & \
+    sleep 10 && \
+    unopkg add --shared /tmp/H2Orestart-0.6.6.oxt && \
+    pkill -f soffice
+
+# 포트 노출
+EXPOSE 2002
+
+# LibreOffice 헤드리스 서비스 시작
+CMD libreoffice --headless --norestore --nofirststartwizard --accept="socket,host=0.0.0.0,port=2002;urp;" --nodefault --nologo

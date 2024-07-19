@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  libreoffice:
+    build:
+      context: .
+      dockerfile: Dockerfile.libreoffice
+    ports:
+      - "2002:2002"
+    networks:
+      - app-network
+
+  streamlit:
+    build:
+      context: .
+      dockerfile: Dockerfile.streamlit
+    ports:
+      - "8503:8503"
+    depends_on:
+      - libreoffice
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
